@@ -9,7 +9,7 @@
     <b-card-body>
       <div v-for="(field, index) in fields" :key="index" class="platform-field">
         <b-form-group :label="field.title" :label-for="generateInputId(field, platform)">
-          <b-form-input :id="generateInputId(field, platform)" :placeholder="field.description" />
+          <b-form-input :id="generateInputId(field, platform)" v-model="fieldValues[field.name]" :placeholder="field.description" />
         </b-form-group>
       </div>
     </b-card-body>
@@ -46,6 +46,14 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      fieldValues: this.fields.reduce((acc, field) => {
+        acc[field.name] = "";
+        return acc;
+      }, {}),
+    };
+  },
   computed: {
     title() {
       return `${this.type.toUpperCase()}`;
@@ -53,9 +61,10 @@ export default {
   },
   methods: {
     generateInputId(field, platform) {
-      const id = platform.name + "-" + field.name;
-      console.log("Field: " + id);
-      return id;
+      return `${platform.name}-${field.name}`;
+    },
+    getFieldValues() {
+      return this.fieldValues;
     },
   },
 };
