@@ -3,18 +3,13 @@
     <div v-if="loading" class="text-center mt-4">
       <b-spinner label="Loading..." />
     </div>
-    <div v-else class="row">
-      <div class="col-md-4 d-flex" v-for="course in courses" :key="course.id">
-        <div class="card">
-          <img :src="course.image" class="card-img-top" :alt="course.name" />
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{ course.name }}</h5>
-            <p class="card-text" v-html="formattedDescription(course.desc)" />
-          </div>
-        </div>
-      </div>
-    </div>
-    <nav aria-label="Page navigation">
+    <b-card-group deck class="card-container">
+      <b-card v-for="course in courses" :key="course.id" @click="handleClick(course)" class="option-card" :img-src="course.image" img-top>
+        <b-card-title class="title">{{ course.name }}</b-card-title>
+        <b-card-text v-html="formattedDescription(course.desc)" />
+      </b-card>
+    </b-card-group>
+    <nav v-if="courses.length > 0" aria-label="Page navigation">
       <ul class="pagination justify-content-center mt-4">
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
           <a class="page-link" href="#" @click.prevent="goToPage(currentPage - 1)">Previous</a>
@@ -31,11 +26,14 @@
 </template>
 
 <script>
-import { BSpinner } from "bootstrap-vue-next";
+import { BCard, BCardText, BCardTitle, BSpinner } from "bootstrap-vue-next";
 
 export default {
   components: {
     BSpinner,
+    BCard,
+    BCardTitle,
+    BCardText,
   },
   props: {
     courses: {
@@ -78,13 +76,26 @@ export default {
 </script>
 
 <style scoped>
-.card {
-  margin-top: 20px;
+
+.card-container {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
-.card-img-top {
-  width: 100%;
-  object-fit: contain;
+
+.option-card {
+  max-width: 26em;
+  margin-top: 1em;
 }
+
+.option-card:hover {
+  transform: scale(1.1);
+  z-index: 999;
+}
+
+.title {
+  font-size: 1.25em;
+  font-weight: bold;
+}
+
 </style>
