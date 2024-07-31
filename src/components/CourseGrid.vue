@@ -4,10 +4,7 @@
       <b-spinner label="Loading..." />
     </div>
     <b-card-group deck class="card-container">
-      <b-card v-for="course in courses" :key="course.id" @click="handleClick(course)" class="option-card" :img-src="course.image" img-top>
-        <b-card-title class="title">{{ course.name }}</b-card-title>
-        <b-card-text v-html="formattedDescription(course.desc)" />
-      </b-card>
+      <b-card v-for="course in courses" :key="course.id" @click="handleClick(course)" class="option-card" :img-src="course.image" img-top :title="course.name"/>
     </b-card-group>
     <nav v-if="courses.length > 0" aria-label="Page navigation">
       <ul class="pagination justify-content-center mt-4">
@@ -26,14 +23,12 @@
 </template>
 
 <script>
-import { BCard, BCardText, BCardTitle, BSpinner } from "bootstrap-vue-next";
+import { BCard, BSpinner } from "bootstrap-vue-next";
 
 export default {
   components: {
     BSpinner,
     BCard,
-    BCardTitle,
-    BCardText,
   },
   props: {
     courses: {
@@ -67,9 +62,6 @@ export default {
       if (page > 0 && page <= this.totalPages) {
         this.$emit("page-changed", page);
       }
-    },
-    formattedDescription(desc) {
-      return desc.replace(/\n/g, "<br>");
     },
   },
 };
