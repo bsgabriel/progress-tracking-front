@@ -9,7 +9,12 @@
     <b-card-body>
       <div v-for="(field, index) in fields" :key="index" class="platform-field">
         <b-form-group :label="field.title" :label-for="generateInputId(field, platform)">
-          <b-form-input :id="generateInputId(field, platform)" v-model="fieldValues[field.name]" :placeholder="field.description" />
+          <b-form-input
+            :id="generateInputId(field, platform)"
+            v-model="fieldValues[field.name]"
+            :placeholder="field.description"
+            @input="saveToLocalStorage"
+          />
         </b-form-group>
       </div>
     </b-card-body>
@@ -48,10 +53,7 @@ export default {
   },
   data() {
     return {
-      fieldValues: this.fields.reduce((acc, field) => {
-        acc[field.name] = "";
-        return acc;
-      }, {}),
+      fieldValues: {},
     };
   },
   computed: {
@@ -66,9 +68,41 @@ export default {
     getFieldValues() {
       return this.fieldValues;
     },
+    saveToLocalStorage() {
+      for (const [key, value] of Object.entries(this.fieldValues)) {
+        localStorage.setItem(this.generateMemoryKeyName(key), value);
+      }
+    },
+    loadFromLocalStorage(fieldName) {
+      return localStorage.getItem(this.generateMemoryKeyName(fieldName));
+    },
+    generateMemoryKeyName(key) {
+      return `${this.type}-${key}`;
+    },
+    initializeFieldValues() {
+      this.fields.forEach(field => {
+        const storedValue = this.loadFromLocalStorage(field.name);
+        this.fieldValues[field.name] = storedValue || "";
+      });
+    }
+  },
+  watch: {
+    fields: {
+      immediate: true,
+      handler() {
+        this.initializeFieldValues();
+      },
+    },
+    fieldValues: {
+      deep: true,
+      handler() {
+        this.saveToLocalStorage();
+      }
+    }
   },
 };
 </script>
+
 
 <style scoped>
 .platform-info-card {
