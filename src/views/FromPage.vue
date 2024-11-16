@@ -12,7 +12,7 @@
 import { ref, onMounted } from "vue";
 import Header from "../components/Header.vue";
 import PlatformList from "../components/PlatformList.vue";
-import { platformStore } from "../store/platformStore.ts";
+import { usePlatformStore } from "../store/platformStore.ts";
 import { useRouter } from "vue-router";
 import { Platform } from "../types/platform";
 
@@ -32,7 +32,7 @@ export default {
     });
 
     const gotToSubmissionPlatformSelection = (platform: Platform) => {
-      platformStore().setSearchPlatform(platform);
+      usePlatformStore().setSearchPlatform(platform);
       router.push({ path: "/to" });
     };
 

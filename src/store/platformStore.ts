@@ -6,7 +6,7 @@ interface PlatformState {
   submissionPlatform: Platform | null;
 }
 
-export const platformStore = defineStore("platform", {
+export const usePlatformStore = defineStore("platform", {
   state: (): PlatformState => ({
     searchPlatform: null,
     submissionPlatform: null,
@@ -24,7 +24,3 @@ export const platformStore = defineStore("platform", {
     getSubmissionPlatform: (state) => state.submissionPlatform,
   },
 });
-
-export default {
-  platformStore,
-};

@@ -11,7 +11,7 @@ import Header from "../components/Header.vue";
 import PlatformList from "../components/PlatformList.vue";
 import { useRouter } from "vue-router";
 import { Platform } from "../types/platform";
-import { platformStore } from "../store/platformStore.ts";
+import { usePlatformStore } from "../store/platformStore.ts";
 
 export default {
   components: {
@@ -28,7 +28,7 @@ export default {
     });
 
     const goToIntegrationPage = (platform: Platform) => {
-      platformStore().setSubmissionPlatform(platform);
+      usePlatformStore().setSubmissionPlatform(platform);
       router.push({ path: "/integration" });
     };
 
