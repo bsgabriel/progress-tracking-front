@@ -7,7 +7,11 @@
         class="d-flex justify-space-between align-center"
       >
         <v-col cols="auto">
-          <v-img :src="platform.logo" :alt="platform.name" class="logo" />
+          <v-img
+            :src="platform.logo"
+            :alt="platform.name"
+            class="logo"
+          />
         </v-col>
         <v-col>
           <h2 class="name">{{ platform.name }}</h2>
@@ -16,7 +20,11 @@
       <v-expand-transition>
         <div v-if="fieldsVisible">
           <form @submit.prevent>
-            <div v-for="field in fields" :key="field.name" class="fields-form">
+            <div
+              v-for="field in fields"
+              :key="field.name"
+              class="fields-form"
+            >
               <v-text-field
                 :label="field.title"
                 :id="field.name"
@@ -64,9 +72,7 @@ export default defineComponent({
     const getFieldRules = (field: Field) => {
       const rules = [];
       if (field.required) {
-        rules.push(
-          (value: string) => !!value || `Please, fill out this field.`
-        );
+        rules.push((value: string) => !!value || `Please, fill out this field.`);
       }
       return rules;
     };

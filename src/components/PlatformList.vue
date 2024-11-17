@@ -9,7 +9,10 @@
         md="4"
         lg="3"
       >
-        <v-card @click="selectPlatform(platform)" class="text-center">
+        <v-card
+          @click="selectPlatform(platform)"
+          class="text-center"
+        >
           <v-img
             :src="platform.logo"
             :alt="`${platform.name} logo`"
