@@ -1,15 +1,22 @@
 <template>
-  <div>
+  <v-container v-if="searchPlatform && searchPlatformFields && submissionPlatform && submissionPlatformFields">
     <Header title="Integration" />
     <PlatformInfo
-      v-if="searchPlatform && searchPlatformFields"
       :platform="searchPlatform"
       :fields="searchPlatformFields" />
     <PlatformInfo
-      v-if="submissionPlatform && submissionPlatformFields"
       :platform="submissionPlatform"
       :fields="submissionPlatformFields" />
-  </div>
+    <v-text-field
+      label="Course name"
+      append-inner-icon="mdi-magnify"
+      @click:append-inner="searchCourse"
+      :placeholder="`Course to search in ${searchPlatform.name}`"
+      variant="outlined"
+      clearable
+      :loading="searchingCourse"
+      v-model="courseName" />
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -32,6 +39,8 @@ export default defineComponent({
 
     const searchPlatformFields = ref<Field[]>([]);
     const submissionPlatformFields = ref<Field[]>([]);
+    const courseName = ref("");
+    let searchingCourse = ref(false);
 
     const fetchPlatformInfo = async (platformName: string) => {
       try {
@@ -55,6 +64,11 @@ export default defineComponent({
       }
     };
 
+    const searchCourse = async () => {
+      searchingCourse.value = !searchingCourse.value;
+      // TODO: implement course search
+    };
+
     onMounted(() => {
       loadPlatforms();
     });
@@ -64,6 +78,9 @@ export default defineComponent({
       submissionPlatform,
       searchPlatformFields,
       submissionPlatformFields,
+      courseName,
+      searchingCourse,
+      searchCourse,
     };
   },
 });
