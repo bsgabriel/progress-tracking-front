@@ -4,13 +4,11 @@
     <PlatformInfo
       v-if="searchPlatform && searchPlatformFields"
       :platform="searchPlatform"
-      :fields="searchPlatformFields"
-    />
+      :fields="searchPlatformFields" />
     <PlatformInfo
       v-if="submissionPlatform && submissionPlatformFields"
       :platform="submissionPlatform"
-      :fields="submissionPlatformFields"
-    />
+      :fields="submissionPlatformFields" />
   </div>
 </template>
 
@@ -48,7 +46,9 @@ export default defineComponent({
     };
 
     const loadPlatforms = async () => {
-      if (platformStore.searchPlatform) searchPlatformFields.value = await fetchPlatformInfo(platformStore.searchPlatform.name);
+      if (platformStore.searchPlatform) {
+        searchPlatformFields.value = await fetchPlatformInfo(platformStore.searchPlatform.name);
+      }
 
       if (platformStore.submissionPlatform) {
         submissionPlatformFields.value = await fetchPlatformInfo(platformStore.submissionPlatform.name);

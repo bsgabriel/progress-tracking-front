@@ -3,8 +3,7 @@
     <Header title="TO" />
     <PlatformList
       :platforms="platforms"
-      @select="goToIntegrationPage"
-    />
+      @select="goToIntegrationPage" />
   </div>
 </template>
 

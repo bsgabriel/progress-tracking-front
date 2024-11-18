@@ -4,14 +4,12 @@
       <v-row
         @click="toggleFields"
         style="cursor: pointer"
-        class="d-flex justify-space-between align-center"
-      >
+        class="d-flex justify-space-between align-center">
         <v-col cols="auto">
           <v-img
             :src="platform.logo"
             :alt="platform.name"
-            class="logo"
-          />
+            class="logo" />
         </v-col>
         <v-col>
           <h2 class="name">{{ platform.name }}</h2>
@@ -23,8 +21,7 @@
             <div
               v-for="field in fields"
               :key="field.name"
-              class="fields-form"
-            >
+              class="fields-form">
               <v-text-field
                 :label="field.title"
                 :id="field.name"
@@ -32,8 +29,7 @@
                 :rules="getFieldRules(field)"
                 variant="outlined"
                 clearable
-                v-model="fieldValues[field.name]"
-              />
+                v-model="fieldValues[field.name]" />
             </div>
           </form>
         </div>
