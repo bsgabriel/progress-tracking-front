@@ -93,7 +93,7 @@ export default defineComponent({
 
 <style scoped>
 .platform-info {
-  margin: 16px;
+  margin: 20px 0;
 }
 
 .platform-info .v-card {
