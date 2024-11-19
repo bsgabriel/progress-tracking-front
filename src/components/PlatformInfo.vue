@@ -20,8 +20,7 @@
           <form @submit.prevent>
             <div
               v-for="field in fields"
-              :key="field.name"
-              class="fields-form">
+              :key="field.name">
               <v-text-field
                 :label="field.title"
                 :id="field.name"
@@ -29,7 +28,8 @@
                 :rules="getFieldRules(field)"
                 variant="outlined"
                 clearable
-                v-model="fieldValues[field.name]" />
+                v-model="fieldValues[field.name]"
+                class="field" />
             </div>
           </form>
         </div>
@@ -106,7 +106,7 @@ export default defineComponent({
   margin-left: 10px;
 }
 
-.fields-form {
-  padding: 10px;
+.field {
+  margin: 15px;
 }
 </style>
