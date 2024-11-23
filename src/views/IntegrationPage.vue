@@ -3,7 +3,8 @@
     <Header title="Integration" />
     <PlatformInfo
       :platform="searchPlatform"
-      :fields="searchPlatformFields" />
+      :fields="searchPlatformFields"
+      ref="searchPlatformInfo" />
     <PlatformInfo
       :platform="submissionPlatform"
       :fields="submissionPlatformFields" />
@@ -40,6 +41,9 @@ export default defineComponent({
     const searchPlatformFields = ref<Field[]>([]);
     const submissionPlatformFields = ref<Field[]>([]);
     const courseName = ref("");
+
+    const searchPlatformInfo = ref(PlatformInfo);
+
     let searchingCourse = ref(false);
 
     const fetchPlatformInfo = async (platformName: string) => {
@@ -55,18 +59,40 @@ export default defineComponent({
     };
 
     const loadPlatforms = async () => {
-      if (platformStore.searchPlatform) {
-        searchPlatformFields.value = await fetchPlatformInfo(platformStore.searchPlatform.name);
+      if (searchPlatform) {
+        searchPlatformFields.value = await fetchPlatformInfo(searchPlatform.name);
       }
 
-      if (platformStore.submissionPlatform) {
-        submissionPlatformFields.value = await fetchPlatformInfo(platformStore.submissionPlatform.name);
+      if (submissionPlatform) {
+        submissionPlatformFields.value = await fetchPlatformInfo(submissionPlatform.name);
       }
     };
 
     const searchCourse = async () => {
-      searchingCourse.value = !searchingCourse.value;
-      // TODO: implement course search
+      searchingCourse.value = true;
+      if (!searchPlatform) {
+        return;
+      }
+      try {
+        const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
+
+        const response = await fetch(
+          `http://localhost:8080/search/from${platformName}?` +
+            new URLSearchParams({
+              ...searchPlatformInfo.value.fieldValues,
+              course: courseName.value,
+              page: 1,
+              max: 6,
+            })
+        );
+
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error("Error searching for courses:", error);
+      } finally {
+        searchingCourse.value = false;
+      }
     };
 
     onMounted(() => {
@@ -81,6 +107,7 @@ export default defineComponent({
       courseName,
       searchingCourse,
       searchCourse,
+      searchPlatformInfo,
     };
   },
 });
