@@ -16,7 +16,7 @@
         </v-col>
       </v-row>
       <v-expand-transition>
-        <div v-if="fieldsVisible">
+        <div v-if="showFields">
           <form @submit.prevent>
             <div
               v-for="field in fields"
@@ -29,7 +29,9 @@
                 variant="outlined"
                 clearable
                 v-model="fieldValues[field.name]"
-                class="field" />
+                :error-messages="fieldErrors[field.name]"
+                class="field"
+                @blur="validateField(field)" />
             </div>
           </form>
         </div>
@@ -57,11 +59,13 @@ export default defineComponent({
   },
   setup(props) {
     const fieldValues = ref<Record<string, string>>({});
-    const fieldsVisible = ref(false);
+    const fieldErrors = ref<Record<string, string | null>>({});
+    const showFields = ref(false);
 
     onMounted(() => {
       props.fields.forEach((field) => {
         fieldValues.value[field.name] = "";
+        fieldErrors.value[field.name] = null;
       });
     });
 
@@ -74,14 +78,42 @@ export default defineComponent({
     };
 
     const toggleFields = () => {
-      fieldsVisible.value = !fieldsVisible.value;
+      showFields.value = !showFields.value;
+    };
+
+    const validateField = (field: Field) => {
+      const value = fieldValues.value[field.name];
+      const rules = getFieldRules(field);
+      for (const rule of rules) {
+        const result = rule(value);
+        if (result !== true) {
+          fieldErrors.value[field.name] = result;
+          return;
+        }
+      }
+      fieldErrors.value[field.name] = null;
+    };
+
+    const validate = () => {
+      Object.keys(fieldErrors.value).forEach((key) => {
+        fieldErrors.value[key] = null;
+      });
+
+      props.fields.forEach((field) => {
+        validateField(field);
+      });
+
+      return Object.values(fieldErrors.value).every((error) => error === null);
     };
 
     return {
       fieldValues,
-      fieldsVisible,
+      fieldErrors,
+      showFields,
       getFieldRules,
       toggleFields,
+      validate,
+      validateField,
     };
   },
 });
