@@ -14,6 +14,13 @@
         <v-col>
           <h2 class="name">{{ platform.name }}</h2>
         </v-col>
+        <v-col
+          cols="auto"
+          class="icon-col">
+          <v-icon
+            icon="mdi-chevron-down"
+            :class="{ 'rotate-icon': showFields, 'rotate-back': !showFields }" />
+        </v-col>
       </v-row>
       <v-expand-transition>
         <div v-if="showFields">
@@ -136,6 +143,22 @@ export default defineComponent({
 
 .name {
   margin-left: 10px;
+}
+
+.icon-col {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 25px;
+}
+
+.rotate-icon {
+  transition: transform 0.5s ease;
+  transform: rotate(180deg);
+}
+
+.rotate-back {
+  transition: transform 0.5s ease;
+  transform: rotate(0deg);
 }
 
 .field {
