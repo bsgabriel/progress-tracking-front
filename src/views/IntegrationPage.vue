@@ -69,11 +69,18 @@ export default defineComponent({
     };
 
     const searchCourse = async () => {
-      searchingCourse.value = true;
       if (!searchPlatform) {
         return;
       }
+
+      if (!searchPlatformInfo.value.validate()) {
+        searchPlatformInfo.value.showFields = true;
+        return;
+      }
+
       try {
+        searchingCourse.value = true;
+
         const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
 
         const response = await fetch(
