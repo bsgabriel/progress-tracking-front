@@ -17,6 +17,19 @@
       clearable
       :loading="searchingCourse"
       v-model="courseName" />
+    <div v-if="fetchedCourses">
+      <div
+        v-for="course in fetchedCourses"
+        :key="course.id">
+        <CourseInfo :course="course">
+          <template v-slot:course-info-slot>
+            <v-btn
+              :text="`Send to ${searchPlatform.name}`"
+              class="btn-submit-course" />
+          </template>
+        </CourseInfo>
+      </div>
+    </div>
   </v-container>
 </template>
 
@@ -26,11 +39,14 @@ import { usePlatformStore } from "@/store/platformStore";
 import PlatformInfo from "@/components/PlatformInfo.vue";
 import { Field } from "@/types/field";
 import Header from "@/components/Header.vue";
+import { Course } from "@/types/course";
+import CourseInfo from "@/components/CourseInfo.vue";
 
 export default defineComponent({
   components: {
     PlatformInfo,
     Header,
+    CourseInfo,
   },
   setup() {
     const platformStore = usePlatformStore();
@@ -43,6 +59,7 @@ export default defineComponent({
     const courseName = ref("");
 
     const searchPlatformInfo = ref(PlatformInfo);
+    const fetchedCourses = ref<Course[]>([]);
 
     let searchingCourse = ref(false);
 
@@ -94,7 +111,8 @@ export default defineComponent({
         );
 
         const data = await response.json();
-        console.log(data);
+        fetchedCourses.value = data.courses;
+        console.log("fetchedCourses", fetchedCourses);
       } catch (error) {
         console.error("Error searching for courses:", error);
       } finally {
@@ -115,6 +133,7 @@ export default defineComponent({
       searchingCourse,
       searchCourse,
       searchPlatformInfo,
+      fetchedCourses,
     };
   },
 });
@@ -123,5 +142,9 @@ export default defineComponent({
 <style scoped>
 .integration-page {
   padding: 16px;
+}
+
+.btn-submit-course {
+  margin-top: 10px;
 }
 </style>
