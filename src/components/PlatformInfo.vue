@@ -4,19 +4,30 @@
       <v-row
         @click="toggleFields"
         style="cursor: pointer"
-        class="d-flex justify-space-between align-center"
-      >
+        class="d-flex justify-space-between align-center">
         <v-col cols="auto">
-          <v-img :src="platform.logo" :alt="platform.name" class="logo" />
+          <v-img
+            :src="platform.logo"
+            :alt="platform.name"
+            class="logo" />
         </v-col>
         <v-col>
           <h2 class="name">{{ platform.name }}</h2>
         </v-col>
+        <v-col
+          cols="auto"
+          class="icon-col">
+          <v-icon
+            icon="mdi-chevron-down"
+            :class="{ 'rotate-icon': showFields, 'rotate-back': !showFields }" />
+        </v-col>
       </v-row>
       <v-expand-transition>
-        <div v-if="fieldsVisible">
+        <div v-if="showFields">
           <form @submit.prevent>
-            <div v-for="field in fields" :key="field.name" class="fields-form">
+            <div
+              v-for="field in fields"
+              :key="field.name">
               <v-text-field
                 :label="field.title"
                 :id="field.name"
@@ -25,7 +36,9 @@
                 variant="outlined"
                 clearable
                 v-model="fieldValues[field.name]"
-              />
+                :error-messages="fieldErrors[field.name]"
+                class="field"
+                @blur="validateField(field)" />
             </div>
           </form>
         </div>
@@ -53,33 +66,61 @@ export default defineComponent({
   },
   setup(props) {
     const fieldValues = ref<Record<string, string>>({});
-    const fieldsVisible = ref(false);
+    const fieldErrors = ref<Record<string, string | null>>({});
+    const showFields = ref(false);
 
     onMounted(() => {
       props.fields.forEach((field) => {
         fieldValues.value[field.name] = "";
+        fieldErrors.value[field.name] = null;
       });
     });
 
     const getFieldRules = (field: Field) => {
       const rules = [];
       if (field.required) {
-        rules.push(
-          (value: string) => !!value || `Please, fill out this field.`
-        );
+        rules.push((value: string) => !!value || `Please, fill out this field.`);
       }
       return rules;
     };
 
     const toggleFields = () => {
-      fieldsVisible.value = !fieldsVisible.value;
+      showFields.value = !showFields.value;
+    };
+
+    const validateField = (field: Field) => {
+      const value = fieldValues.value[field.name];
+      const rules = getFieldRules(field);
+      for (const rule of rules) {
+        const result = rule(value);
+        if (result !== true) {
+          fieldErrors.value[field.name] = result;
+          return;
+        }
+      }
+      fieldErrors.value[field.name] = null;
+    };
+
+    const validate = () => {
+      Object.keys(fieldErrors.value).forEach((key) => {
+        fieldErrors.value[key] = null;
+      });
+
+      props.fields.forEach((field) => {
+        validateField(field);
+      });
+
+      return Object.values(fieldErrors.value).every((error) => error === null);
     };
 
     return {
       fieldValues,
-      fieldsVisible,
+      fieldErrors,
+      showFields,
       getFieldRules,
       toggleFields,
+      validate,
+      validateField,
     };
   },
 });
@@ -87,7 +128,7 @@ export default defineComponent({
 
 <style scoped>
 .platform-info {
-  margin: 16px;
+  margin: 20px 0;
 }
 
 .platform-info .v-card {
@@ -104,7 +145,23 @@ export default defineComponent({
   margin-left: 10px;
 }
 
-.fields-form {
-  padding: 10px;
+.icon-col {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 25px;
+}
+
+.rotate-icon {
+  transition: transform 0.5s ease;
+  transform: rotate(180deg);
+}
+
+.rotate-back {
+  transition: transform 0.5s ease;
+  transform: rotate(0deg);
+}
+
+.field {
+  margin: 15px;
 }
 </style>

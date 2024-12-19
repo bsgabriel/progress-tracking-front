@@ -7,14 +7,14 @@
         cols="12"
         sm="6"
         md="4"
-        lg="3"
-      >
-        <v-card @click="selectPlatform(platform)" class="text-center">
+        lg="3">
+        <v-card
+          @click="selectPlatform(platform)"
+          class="text-center">
           <v-img
             :src="platform.logo"
             :alt="`${platform.name} logo`"
-            class="platform-logo"
-          />
+            class="platform-logo" />
           <v-card-title>{{ platform.name }}</v-card-title>
         </v-card>
       </v-col>

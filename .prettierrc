@@ -1,0 +1,11 @@
+{
+  "printWidth": 300,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "semi": true,
+  "bracketSpacing": true,
+  "proseWrap": "always",
+  "arrowParens": "always",
+  "singleAttributePerLine": true,
+  "bracketSameLine": true
+}

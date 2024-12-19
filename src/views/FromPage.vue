@@ -3,8 +3,7 @@
     <Header title="FROM" />
     <PlatformList
       :platforms="platforms"
-      @select="gotToSubmissionPlatformSelection"
-    />
+      @select="gotToSubmissionPlatformSelection" />
   </div>
 </template>
 

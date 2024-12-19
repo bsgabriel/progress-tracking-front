@@ -1,7 +1,9 @@
 <template>
   <div>
     <Header title="TO" />
-    <PlatformList :platforms="platforms" @select="goToIntegrationPage" />
+    <PlatformList
+      :platforms="platforms"
+      @select="goToIntegrationPage" />
   </div>
 </template>
 
