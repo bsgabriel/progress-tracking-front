@@ -7,7 +7,8 @@
       ref="searchPlatformInfo" />
     <PlatformInfo
       :platform="submissionPlatform"
-      :fields="submissionPlatformFields" />
+      :fields="submissionPlatformFields"
+      ref="submissionPlatformInfo" />
     <v-text-field
       label="Course name"
       append-inner-icon="mdi-magnify"
@@ -25,7 +26,8 @@
           <template v-slot:course-info-slot>
             <v-btn
               :text="`Send to ${searchPlatform.name}`"
-              class="btn-submit-course" />
+              class="btn-submit-course"
+              @click="sendCourse(course)" />
           </template>
         </CourseInfo>
       </div>
@@ -59,6 +61,7 @@ export default defineComponent({
     const courseName = ref("");
 
     const searchPlatformInfo = ref(PlatformInfo);
+    const submissionPlatformInfo = ref(PlatformInfo);
     const fetchedCourses = ref<Course[]>([]);
 
     let searchingCourse = ref(false);
@@ -120,6 +123,45 @@ export default defineComponent({
       }
     };
 
+    const sendCourse = async (course: Course) => {
+      console.log(submissionPlatformInfo);
+
+      if (!submissionPlatform) {
+        return;
+      }
+
+      if (!submissionPlatformInfo.value.validate()) {
+        submissionPlatformInfo.value.showFields = true;
+        return;
+      }
+
+      const platformName = submissionPlatform.name[0].toUpperCase() + submissionPlatform.name.slice(1).toLowerCase();
+      const data = {
+        ...submissionPlatformInfo.value.fieldValues,
+        course: { ...course },
+      };
+
+      try {
+        const response = await fetch(`http://localhost:8080/submit/to${platformName}?`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const responseData = await response.json();
+        console.log("card created! Link: ", responseData);
+      } catch (error) {
+        console.error("Erro:", error);
+      }
+    };
+
     onMounted(() => {
       loadPlatforms();
     });
@@ -134,6 +176,8 @@ export default defineComponent({
       searchCourse,
       searchPlatformInfo,
       fetchedCourses,
+      sendCourse,
+      submissionPlatformInfo,
     };
   },
 });
