@@ -25,13 +25,14 @@
         <CourseInfo :course="course">
           <template v-slot:course-info-slot>
             <v-btn
-              :text="`Send to ${searchPlatform.name}`"
+              :text="`Send to ${submissionPlatform.name}`"
               class="btn-submit-course"
               @click="sendCourse(course)" />
           </template>
         </CourseInfo>
       </div>
     </div>
+    <LoadingModal ref="loadingModal" />
   </v-container>
 </template>
 
@@ -43,12 +44,14 @@ import { Field } from "@/types/field";
 import Header from "@/components/Header.vue";
 import { Course } from "@/types/course";
 import CourseInfo from "@/components/CourseInfo.vue";
+import LoadingModal from "@/components/LoadingModal.vue";
 
 export default defineComponent({
   components: {
     PlatformInfo,
     Header,
     CourseInfo,
+    LoadingModal,
   },
   setup() {
     const platformStore = usePlatformStore();
@@ -63,6 +66,8 @@ export default defineComponent({
     const searchPlatformInfo = ref(PlatformInfo);
     const submissionPlatformInfo = ref(PlatformInfo);
     const fetchedCourses = ref<Course[]>([]);
+
+    const loadingModal = ref(LoadingModal);
 
     let searchingCourse = ref(false);
 
@@ -124,8 +129,6 @@ export default defineComponent({
     };
 
     const sendCourse = async (course: Course) => {
-      console.log(submissionPlatformInfo);
-
       if (!submissionPlatform) {
         return;
       }
@@ -142,6 +145,8 @@ export default defineComponent({
       };
 
       try {
+        loadingModal.value.show(`Sending to ${platformName}`, "<p>Loading...</p>");
+
         const response = await fetch(`http://localhost:8080/submit/to${platformName}?`, {
           method: "POST",
           headers: {
@@ -156,9 +161,10 @@ export default defineComponent({
         }
 
         const responseData = await response.json();
-        console.log("card created! Link: ", responseData);
+        loadingModal.value.done(`Sent to ${platformName}`, `<p>Click <a href="${responseData.cardUrl}" target="_blank" rel="noopener noreferrer">here</a> to access the card.</p>`);
       } catch (error) {
         console.error("Erro:", error);
+        loadingModal.value.done("Error", `<p>Something went wrong. Sorry!</p>`);
       }
     };
 
@@ -178,6 +184,7 @@ export default defineComponent({
       fetchedCourses,
       sendCourse,
       submissionPlatformInfo,
+      loadingModal,
     };
   },
 });
