@@ -101,6 +101,7 @@ export default defineComponent({
         return;
       }
 
+      fetchedCourses.value = [];
       const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
       loadingModal.value.show(`Searching on ${platformName}`, "<p>Loading...</p>", true);
 
