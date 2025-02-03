@@ -16,7 +16,6 @@
       :placeholder="`Course to search in ${searchPlatform.name}`"
       variant="outlined"
       clearable
-      :loading="searchingCourse"
       v-model="courseName" />
     <div v-if="fetchedCourses">
       <div
@@ -45,6 +44,7 @@ import Header from "@/components/Header.vue";
 import { Course } from "@/types/course";
 import CourseInfo from "@/components/CourseInfo.vue";
 import LoadingModal from "@/components/LoadingModal.vue";
+import axios from "axios";
 
 export default defineComponent({
   components: {
@@ -68,8 +68,6 @@ export default defineComponent({
     const fetchedCourses = ref<Course[]>([]);
 
     const loadingModal = ref(LoadingModal);
-
-    let searchingCourse = ref(false);
 
     const fetchPlatformInfo = async (platformName: string) => {
       try {
@@ -103,29 +101,26 @@ export default defineComponent({
         return;
       }
 
-      try {
-        searchingCourse.value = true;
+      const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
+      loadingModal.value.show(`Searching on ${platformName}`, "<p>Loading...</p>", true);
 
-        const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
-
-        const response = await fetch(
-          `http://localhost:8080/search/from${platformName}?` +
-            new URLSearchParams({
-              ...searchPlatformInfo.value.fieldValues,
-              course: courseName.value,
-              page: 1,
-              max: 6,
-            })
-        );
-
-        const data = await response.json();
-        fetchedCourses.value = data.courses;
-        console.log("fetchedCourses", fetchedCourses);
-      } catch (error) {
-        console.error("Error searching for courses:", error);
-      } finally {
-        searchingCourse.value = false;
-      }
+      axios
+        .get(`http://localhost:8080/search/from${platformName}`, {
+          params: {
+            ...searchPlatformInfo.value.fieldValues,
+            course: courseName.value,
+            page: 1,
+            max: 6,
+          },
+        })
+        .then((response) => {
+          fetchedCourses.value = response.data.courses;
+          console.log("fetchedCourses", fetchedCourses);
+          loadingModal.value.close();
+        })
+        .catch((error) => {
+          loadingModal.value.done(error.response.data.title, error.response.data.detail);
+        });
     };
 
     const sendCourse = async (course: Course) => {
@@ -144,28 +139,20 @@ export default defineComponent({
         course: { ...course },
       };
 
-      try {
-        loadingModal.value.show(`Sending to ${platformName}`, "<p>Loading...</p>");
+      loadingModal.value.show(`Sending to ${platformName}`, "<p>Loading...</p>", false);
 
-        const response = await fetch(`http://localhost:8080/submit/to${platformName}?`, {
-          method: "POST",
+      axios
+        .post(`http://localhost:8080/submit/to${platformName}`, data, {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+        })
+        .then((response) => {
+          loadingModal.value.done(`Sent to ${platformName}`, `<p>Click <a href="${response.data.cardUrl}" target="_blank" rel="noopener noreferrer">here</a> to access the card.</p>`);
+        })
+        .catch((error) => {
+          loadingModal.value.done(error.response.data.title, error.response.data.detail);
         });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-
-        const responseData = await response.json();
-        loadingModal.value.done(`Sent to ${platformName}`, `<p>Click <a href="${responseData.cardUrl}" target="_blank" rel="noopener noreferrer">here</a> to access the card.</p>`);
-      } catch (error) {
-        console.error("Erro:", error);
-        loadingModal.value.done("Error", `<p>Something went wrong. Sorry!</p>`);
-      }
     };
 
     onMounted(() => {
@@ -178,7 +165,6 @@ export default defineComponent({
       searchPlatformFields,
       submissionPlatformFields,
       courseName,
-      searchingCourse,
       searchCourse,
       searchPlatformInfo,
       fetchedCourses,
