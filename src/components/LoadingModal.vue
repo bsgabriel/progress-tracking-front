@@ -26,8 +26,8 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          @click="handleCancel"
-          v-if="isDone">
+          @click="close"
+          v-if="isDone || !autoCloseable">
           Close
         </v-btn>
       </v-card-actions>
@@ -45,12 +45,14 @@ export default defineComponent({
     const title = ref("");
     const body = ref("");
     const isDone = ref(false);
+    const autoCloseable = ref(false);
 
-    const show = (modalTitle: string, modalBody: string) => {
-      title.value = modalTitle;
-      body.value = modalBody;
+    const show = (_title: string, _body: string, _autoCloseable: boolean) => {
+      title.value = _title;
+      body.value = _body;
       isVisible.value = true;
       isDone.value = false;
+      autoCloseable.value = _autoCloseable;
     };
 
     const done = (modalTitle?: string, modalBody?: string) => {
@@ -63,7 +65,8 @@ export default defineComponent({
       isDone.value = true;
     };
 
-    const handleCancel = () => {
+    const close = () => {
+      isDone.value = true;
       isVisible.value = false;
     };
 
@@ -72,9 +75,10 @@ export default defineComponent({
       title,
       body,
       isDone,
+      autoCloseable,
       show,
       done,
-      handleCancel,
+      close,
     };
   },
 });
