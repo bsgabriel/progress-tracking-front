@@ -7,7 +7,8 @@
       ref="searchPlatformInfo" />
     <PlatformInfo
       :platform="submissionPlatform"
-      :fields="submissionPlatformFields" />
+      :fields="submissionPlatformFields"
+      ref="submissionPlatformInfo" />
     <v-text-field
       label="Course name"
       append-inner-icon="mdi-magnify"
@@ -15,7 +16,6 @@
       :placeholder="`Course to search in ${searchPlatform.name}`"
       variant="outlined"
       clearable
-      :loading="searchingCourse"
       v-model="courseName" />
     <div v-if="fetchedCourses">
       <div
@@ -24,12 +24,14 @@
         <CourseInfo :course="course">
           <template v-slot:course-info-slot>
             <v-btn
-              :text="`Send to ${searchPlatform.name}`"
-              class="btn-submit-course" />
+              :text="`Send to ${submissionPlatform.name}`"
+              class="btn-submit-course"
+              @click="sendCourse(course)" />
           </template>
         </CourseInfo>
       </div>
     </div>
+    <LoadingModal ref="loadingModal" />
   </v-container>
 </template>
 
@@ -41,12 +43,15 @@ import { Field } from "@/types/field";
 import Header from "@/components/Header.vue";
 import { Course } from "@/types/course";
 import CourseInfo from "@/components/CourseInfo.vue";
+import LoadingModal from "@/components/LoadingModal.vue";
+import axios from "axios";
 
 export default defineComponent({
   components: {
     PlatformInfo,
     Header,
     CourseInfo,
+    LoadingModal,
   },
   setup() {
     const platformStore = usePlatformStore();
@@ -59,9 +64,10 @@ export default defineComponent({
     const courseName = ref("");
 
     const searchPlatformInfo = ref(PlatformInfo);
+    const submissionPlatformInfo = ref(PlatformInfo);
     const fetchedCourses = ref<Course[]>([]);
 
-    let searchingCourse = ref(false);
+    const loadingModal = ref(LoadingModal);
 
     const fetchPlatformInfo = async (platformName: string) => {
       try {
@@ -95,29 +101,59 @@ export default defineComponent({
         return;
       }
 
-      try {
-        searchingCourse.value = true;
+      fetchedCourses.value = [];
+      const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
+      loadingModal.value.show(`Searching on ${platformName}`, "<p>Loading...</p>", true);
 
-        const platformName = searchPlatform.name[0].toUpperCase() + searchPlatform.name.slice(1).toLowerCase();
+      axios
+        .get(`http://localhost:8080/search/from${platformName}`, {
+          params: {
+            ...searchPlatformInfo.value.fieldValues,
+            course: courseName.value,
+            page: 1,
+            max: 6,
+          },
+        })
+        .then((response) => {
+          fetchedCourses.value = response.data.courses;
+          console.log("fetchedCourses", fetchedCourses);
+          loadingModal.value.close();
+        })
+        .catch((error) => {
+          loadingModal.value.done(error.response.data.title, error.response.data.detail);
+        });
+    };
 
-        const response = await fetch(
-          `http://localhost:8080/search/from${platformName}?` +
-            new URLSearchParams({
-              ...searchPlatformInfo.value.fieldValues,
-              course: courseName.value,
-              page: 1,
-              max: 6,
-            })
-        );
-
-        const data = await response.json();
-        fetchedCourses.value = data.courses;
-        console.log("fetchedCourses", fetchedCourses);
-      } catch (error) {
-        console.error("Error searching for courses:", error);
-      } finally {
-        searchingCourse.value = false;
+    const sendCourse = async (course: Course) => {
+      if (!submissionPlatform) {
+        return;
       }
+
+      if (!submissionPlatformInfo.value.validate()) {
+        submissionPlatformInfo.value.showFields = true;
+        return;
+      }
+
+      const platformName = submissionPlatform.name[0].toUpperCase() + submissionPlatform.name.slice(1).toLowerCase();
+      const data = {
+        ...submissionPlatformInfo.value.fieldValues,
+        course: { ...course },
+      };
+
+      loadingModal.value.show(`Sending to ${platformName}`, "<p>Loading...</p>", false);
+
+      axios
+        .post(`http://localhost:8080/submit/to${platformName}`, data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          loadingModal.value.done(`Sent to ${platformName}`, `<p>Click <a href="${response.data.cardUrl}" target="_blank" rel="noopener noreferrer">here</a> to access the card.</p>`);
+        })
+        .catch((error) => {
+          loadingModal.value.done(error.response.data.title, error.response.data.detail);
+        });
     };
 
     onMounted(() => {
@@ -130,10 +166,12 @@ export default defineComponent({
       searchPlatformFields,
       submissionPlatformFields,
       courseName,
-      searchingCourse,
       searchCourse,
       searchPlatformInfo,
       fetchedCourses,
+      sendCourse,
+      submissionPlatformInfo,
+      loadingModal,
     };
   },
 });
