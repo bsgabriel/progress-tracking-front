@@ -4,7 +4,8 @@ import ToPage from "../views/ToPage.vue";
 import IntegrationPage from "../views/IntegrationPage.vue";
 
 const routes = [
-  { path: "/", component: FromPage },
+  { path: "/", redirect: "/from" },
+  { path: "/from", component: FromPage },
   { path: "/to", component: ToPage },
   { path: "/integration", component: IntegrationPage },
 ];
