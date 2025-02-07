@@ -7,9 +7,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, provide } from "vue";
+import { useRouter } from "vue-router";
+import { NavigationService } from "./services/navigationService";
 
 export default defineComponent({
   name: "App",
+  setup() {
+    const serivce = new NavigationService(useRouter());
+    provide("navigationService", serivce);
+  },
 });
 </script>
