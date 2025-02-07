@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, ref, inject } from "vue";
 import { usePlatformStore } from "@/store/platformStore";
 import PlatformInfo from "@/components/PlatformInfo.vue";
 import { Field } from "@/types/field";
@@ -45,6 +45,7 @@ import { Course } from "@/types/course";
 import CourseInfo from "@/components/CourseInfo.vue";
 import LoadingModal from "@/components/LoadingModal.vue";
 import axios from "axios";
+import { NavigationService } from "@/services/navigationService";
 
 export default defineComponent({
   components: {
@@ -69,6 +70,8 @@ export default defineComponent({
 
     const loadingModal = ref(LoadingModal);
 
+    const navigationService = inject<NavigationService>("navigationService");
+
     const fetchPlatformInfo = async (platformName: string) => {
       try {
         const response = await fetch(`http://localhost:8080/platform/info/${platformName}`);
@@ -82,13 +85,13 @@ export default defineComponent({
     };
 
     const loadPlatforms = async () => {
-      if (searchPlatform) {
-        searchPlatformFields.value = await fetchPlatformInfo(searchPlatform.name);
+      if (!searchPlatform || !submissionPlatform) {
+        navigationService?.goToSearchPlatformSelection();
+        return;
       }
 
-      if (submissionPlatform) {
-        submissionPlatformFields.value = await fetchPlatformInfo(submissionPlatform.name);
-      }
+      searchPlatformFields.value = await fetchPlatformInfo(searchPlatform.name);
+      submissionPlatformFields.value = await fetchPlatformInfo(submissionPlatform.name);
     };
 
     const searchCourse = async () => {
